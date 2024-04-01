@@ -302,7 +302,7 @@ def main(stdscr):
         display_text(stdscr,"Expressing sorrow for your loss, he reveals that he was a close friend of your father's.\n",0,3)
         display_text(stdscr,"He shows you a picture to validate his claim and explains that he has been anticipating your arrival to help you complete your mission.\n",0,3)
         display_text(stdscr,"Guiding you to a point between two doors, he gestures for you to make a choice.\n",0,3)
-        
+        door(stdscr)
         
         
         stdscr.getch()
