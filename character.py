@@ -1,8 +1,11 @@
+import health_bar
+from health_bar import HealthBar
+
 class Character:
-    def __init__(self, name, health, points, damage) -> None:
+    def __init__(self, name, health, points) -> None:
         self.name = name
         self.health = health
-        self.damage = damage
+        self.health_max = health
         self.points = points
         
         
@@ -19,6 +22,7 @@ class Hero(Character):
                          health = health,
                          points = points)
         
+        self.health_bar = HealthBar(self,color="green")
         
 class Enemy(Character):
     def __init__(self, name, health, points) -> None:
