@@ -1,0 +1,181 @@
+import curses
+from curses import wrapper
+from curses.textpad import Textbox
+import time
+
+choice='a'
+
+def type(stdscr,message,i):
+    for char in message:
+     stdscr.addstr(char,curses.color_pair(i))
+     stdscr.refresh()
+     time.sleep(0.05)
+
+def foot(stdscr,footer_win,i):
+    footer_win.refresh()
+    footer_win.addstr(0,0,"Press any key to continue.", curses.color_pair(i) | curses.A_BOLD)
+    stdscr.refresh()
+    footer_win.refresh()
+    stdscr.getch()
+
+def temple_entry(stdscr, choice):
+    type(stdscr, "Which door do you choose ?\nPress 'r' for right or 'l' for left\n",4)
+    choice = stdscr.getkey()
+    if choice == 'l':
+        type(stdscr, "Upon your attempt to enter, a message halts your progress: 'Your worthiness is insufficient to pass through here'\nPlease find another way in\n", 2)
+        stdscr.refresh()
+        temple_entry(stdscr, choice)
+    elif choice != 'r':
+        type(stdscr, "This option is not available\nPlease try again\n", 1)
+        stdscr.refresh()
+        temple_entry(stdscr, choice)
+
+def snake_tool(stdscr, choice):
+    type(stdscr, "Which tool do you want to use ?\nPress 'l' for lighter or 'b' for short bow\n",4)
+    choice = stdscr.getkey()
+    if choice == 'l':
+        type(stdscr, "The snakes slightly back away\n", 3)
+        stdscr.refresh()
+    elif choice == 'b':
+        type(stdscr, "That wasn't helpful, the snakes have swarmed around you and injected their venom into your blood\nChoose another tool\n", 2)
+        stdscr.refresh()
+        snake_tool(stdscr, choice)
+    else:
+        type(stdscr, "Choose between the offered tools\n", 1)
+        stdscr.refresh()
+        snake_tool(stdscr, choice)
+
+def bigger_flame(stdscr, choice):
+    type(stdscr, "What do you do ?\nPress 'k' if you want to use kerosene oil or 'j' if you want to ask Jeremy for desinfecting spray\n",4)
+    choice = stdscr.getkey()
+    if choice == 'k':
+        type(stdscr, "The oil ran out\nThere wasn't enough\nTry again\n", 2)
+        stdscr.refresh()
+        bigger_flame(stdscr, choice)
+    elif choice == 'j':
+        type(stdscr, "You defeated the snakes and got the first piece of your treasure\n", 3)
+        stdscr.refresh()
+    else:
+        type(stdscr, "This option is not available\nTry again\n", 1)
+        stdscr.refresh()
+        bigger_flame(stdscr, choice)
+
+def snake_approach(stdscr, choice):
+    type(stdscr, "What do you want to do ?\nPress 'd' to dodge or 'b' to block\n",4)
+    choice = stdscr.getkey()
+    if choice == 'b':
+        type(stdscr, "Its attack was too strong\nYou didn't have time to get back into position\nTry again\n", 2)
+        stdscr.refresh()
+        snake_approach(stdscr, choice)
+    elif choice == 'd':
+        type(stdscr, "You dodged successfully\n", 3)
+        stdscr.refresh()
+    else:
+        type(stdscr, "This option is not available\nTry again\n", 1)
+        stdscr.refresh()
+        snake_approach(stdscr, choice)
+
+def snake_attack(stdscr, choice):
+    type(stdscr, "What tool do you want to use during the fight ?\nPress 'l' for lighter, 's' for sword or 'k' for knife\n",4)
+    choice = stdscr.getkey()
+    if choice == 's' or choice == 'k':
+        hit(stdscr, choice)
+    elif choice == 'l':
+        type(stdscr, "It was not helpful\nTry again\n", 2)
+        stdscr.refresh()
+        snake_attack(stdscr, choice)
+    else:
+        type(stdscr, "Choose between offered tools only\nTry again\n", 1)
+        stdscr.refresh()
+        snake_attack(stdscr, choice)
+
+def hit(stdscr, choice):
+    type(stdscr, "Where do you want to hit ?\nPress 'h' if you want to go for the head or 'u' for the underbelly\n",4)
+    choice = stdscr.getkey()
+    if choice == 'u':
+        type(stdscr, "The momentum caused you to drop your weapon\n", 4)
+        stdscr.refresh()
+        drop(stdscr, choice)
+    elif choice == 'h':
+        type(stdscr, "The snake was fatser than you\nIt striked again\n", 2)
+        stdscr.refresh()
+        hit(stdscr, choice)
+    else:
+        type(stdscr, "This option is not avalaible\nTry again\n", 1)
+        stdscr.refresh()
+        hit(stdscr, choice)
+
+def drop(stdscr, choice):
+    type(stdscr, "How do you proceed ?\nPress 'h' if you want to ask for help or 'p' if you want to try to pick it back up\n",4)
+    choice = stdscr.getkey()
+    if choice == 'h':
+        help(stdscr, choice)
+    elif choice == 'p':
+        type(stdscr, "You weren't fast enough\nThe monster took its revenge on you\nTry again\n", 2)
+        stdscr.refresh()
+        drop(stdscr, choice)
+    else:
+        type(stdscr, "This option is not available\nTry again\n", 1)
+        stdscr.refresh()
+        drop(stdscr, choice)
+
+def help(stdscr, choice):
+    type(stdscr, "Who do you want to ask ?\nPress 'j' for Jeremy or 'c' for the creature\n",4)
+    choice = stdscr.getkey()
+    if choice == 'j':
+        type(stdscr, "Jeremy sprayed disinfecting spray all over the room, blocking some the snake's senses. It served as a distraction while you picked up the weapon and dealt the final blow, defeating the snake and acquiring the last piece\n", 3)
+        stdscr.refresh()
+    elif choice == 'c':
+        type(stdscr, "The creature can’t help, it is banned by the guardians from interfering with your mission\nTry again\n", 2)
+        stdscr.refresh()
+        help(stdscr, choice)
+    else:
+        type(stdscr, "This option isn't available\nTry again\n", 1)
+        help(stdscr, choice)
+
+def main(stdscr):
+    curses.init_pair(1, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+    curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
+    curses.init_pair(3, curses.COLOR_GREEN, curses.COLOR_BLACK)
+    curses.init_pair(4, curses.COLOR_WHITE, curses.COLOR_BLACK)
+    curses.init_pair(5, curses.COLOR_RED, curses.COLOR_WHITE)
+   
+    height, width = stdscr.getmaxyx()
+    footer_win = curses.newwin(1, width, height-1, 0)
+
+    type(stdscr, "You encountered a shimmering creature. 'I'll guide you through the challenges' it said,'revealing a piece of your treasure'.\nYou reached two grand doors.\n'Beyond lie the trials' the creature declared,'Ready? now make your choice'\n",4)
+    temple_entry(stdscr,choice)
+    foot(stdscr,footer_win,5)
+    stdscr.refresh()
+    stdscr.clear()
+
+    type(stdscr, "Concealed among venomous snakes is a crucial piece of your treasure. Carefully, you navigate through the danger to claim it.\n",4)
+    snake_tool(stdscr, choice)
+    foot(stdscr,footer_win,5)
+    stdscr.refresh()
+    stdscr.clear()
+   
+    type(stdscr,"You need to create a bigger flame\n",4)
+    bigger_flame(stdscr, choice)
+    foot(stdscr,footer_win,5)
+    stdscr.refresh()
+    stdscr.clear()
+
+    type(stdscr, "You go back through the other door\nYou find a giant snake\nIt's the mother\nIT'S ATTACKING\nACT QUICK\n",4)
+    snake_approach(stdscr, choice)
+    foot(stdscr,footer_win,5)
+    stdscr.refresh()
+    stdscr.clear()
+
+    type(stdscr, "It's time for you to attack now\n", 4)
+    snake_attack(stdscr,choice)
+    foot(stdscr,footer_win,5)
+    stdscr.refresh()
+    stdscr.clear()
+
+    type(stdscr, "After you exit the room the guardians approach you with one of them carrying a box. They say in unison 'hand over the circle of life and this box shall be yours'\nYou exchange the items with them. As soon as you hold the box, a hologram of your father appears, 'hello dear if you are seeing this it means that I have unfortunately passed away, but alas you must continue your journey to open this box you must solve this riddle'\nIn the box, you find a weathered parchment map with faded markings. As you study it, you notice a series of cryptic symbols that seem to point to a location in the Egyptian desert. Alongside the map is a fragment of an ancient artifact, engraved with hieroglyphs depicting a pyramid and the silhouette of a traveler facing westward. A note tucked inside the box reads, 'Seek the sands where the sun sets, for there lies the next chapter of your journey'\n",4)
+    foot(stdscr,footer_win,5)
+    stdscr.refresh()
+    stdscr.getch()
+
+wrapper(main)
