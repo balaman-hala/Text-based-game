@@ -39,7 +39,7 @@ class Character:
         self.tool=tool
 
 
-    def attack(self,stdscr,target, power):
+    def attack(self,stdscr,target, power: int =1):
         global line_counter
         self.power=power
         target.health -= self.tool.damage*self.power
@@ -113,7 +113,7 @@ def fight_show(stdscr, enemy_name : str , enemy_health : int , enemy_weapon  ,he
     
     
 
-def help (stdscr,key,hero_health: int, enemy_health: int,hero_weapon,power):
+def help (stdscr,key,enemy_name:str,enemy_weapon,hero_health: int, enemy_health: int,hero_weapon,power):
     global line_counter
     display_text(stdscr,"Who do you want to ask\n",0,1)
     display_text(stdscr,"Please press\n",0,4)
@@ -126,34 +126,34 @@ def help (stdscr,key,hero_health: int, enemy_health: int,hero_weapon,power):
         stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
         line_counter +=3
         jeremy=Character("jeremy",100,Spray)
-        enemy=Character("Spider",enemy_health,Fangs)
+        enemy=Character(enemy_name,enemy_health,enemy_weapon)
         jeremy.attack(stdscr,enemy,1)
         display_text(stdscr,"jerymys attack served as a distraction",0,3)
         clr(stdscr)
         display_text(stdscr,f"It gave you enough time to pick up {jeremy.tool.name} and start attacking again",0,4)
         stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
         line_counter += 3
-        fight_show(stdscr,"Spider",enemy_health,Fangs,hero_health,hero_weapon,power)
+        fight_show(stdscr,enemy_name,enemy_health,enemy_weapon,hero_health,hero_weapon,power)
         
     elif key== 'm':
         display_text(stdscr,"The master can't help. He took an oath not to interfere with the mission",0,2)
         clr(stdscr)
         stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
         line_counter += 3
-        enemy=Character("Spider",enemy_health,Fangs)
+        enemy=Character(enemy_name,enemy_health,enemy_weapon)
         hero=Character("charlotte",hero_health,Fist)
         enemy.attack(stdscr,hero,1)
         
-        fight_show(stdscr,"Spider",enemy_health,Fangs,hero_health,Fist,1)
+        fight_show(stdscr,enemy_name,enemy_health,enemy_weapon,hero_health,Fist,1)
         
     else:
         display_text(stdscr,"Invalid choice. Try again",0,3)
         clr(stdscr)
-        help(stdscr,key,hero_health,enemy_health)
+        help(stdscr,key,enemy_name,enemy_weapon,hero_health,enemy_health,hero_weapon,power)
         
     
 
-def tool_drop(stdscr,key,enemy_health: int, hero_health: int,hero_weapon,power):
+def tool_drop(stdscr,key,enemy_name :str,enemy_health: int,enemy_weapon, hero_health: int,hero_weapon,power):
     global line_counter
     display_text(stdscr,"The attack of the spider caused you to drop your weapon\n",0,4)
     display_text(stdscr,"How do you want to procede?\n",0,1)
@@ -164,27 +164,28 @@ def tool_drop(stdscr,key,enemy_health: int, hero_health: int,hero_weapon,power):
     line_counter += 1
     if key == 'p':
         clr(stdscr)
+        display_text(stdscr,"you weren't quick enough. you have to finish the fight with your fists",0,2)
         stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
         line_counter += 3
-        enemy=Character("Spider",enemy_health,Fangs)
+        enemy=Character(enemy_name,enemy_health,enemy_weapon)
         hero=Character("charlotte",hero_health,Fist)
         enemy.attack(stdscr,hero,1)
-        fight_show(stdscr,"Spider",enemy_health,Fangs,hero_health,Fist,1)
+        fight_show(stdscr,enemy_name,enemy_health,enemy_weapon,hero_health,Fist,1)
         clr(stdscr)
         
     elif key == 'h':
-        help(stdscr,key,hero_health,enemy_health,hero_weapon,power)
+        help(stdscr,key,enemy_name,enemy_weapon,hero_health,enemy_health,hero_weapon,power)
        
         
           
     else:
         display_text(stdscr,"Invalid choice. Try again",0,3)
         clr(stdscr)
-        tool_drop(stdscr,key,enemy_health,hero_health,hero_weapon,power)
+        tool_drop(stdscr,key,enemy_name,enemy_health,enemy_weapon,hero_health,hero_weapon,power)
 
 
 
-def attack_area (stdscr,key,hero_weapon):
+def attack_area (stdscr,key,hero_weapon,hero_health:int ,enemy_name: str, enemy_weapon):
     global line_counter
     display_text(stdscr,"Where do you want to hit?\n",0,1)
     display_text(stdscr,"Please press\n",0,4)
@@ -196,27 +197,27 @@ def attack_area (stdscr,key,hero_weapon):
         clr(stdscr)
         stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
         line_counter += 3
-        fight_show(stdscr,"spider",100,Fangs,100,hero_weapon,1)
+        fight_show(stdscr,enemy_name,100,enemy_weapon,hero_health,hero_weapon,1)
         clr(stdscr)
     elif key == 's':
         clr(stdscr)
         hero=Character("Charlotte",100,hero_weapon)
-        enemy=Character("Spider",100,Fangs)
+        enemy=Character(enemy_name,100,enemy_weapon)
         stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
         line_counter += 3
         hero.attack(stdscr,enemy,2)
         enemy.attack(stdscr,hero,1)
         clr(stdscr)
-        tool_drop(stdscr,key,enemy.health,hero.health,hero_weapon,2)
+        tool_drop(stdscr,key,enemy_name,enemy.health,enemy_weapon,hero.health,hero_weapon,2)
         
     else:
         display_text(stdscr,"Invalid choice. Try again",0,3)
         clr(stdscr)
-        attack_area(stdscr,key,hero_weapon)
+        attack_area(stdscr,key,hero_weapon,hero_health,enemy_name,enemy_weapon)
         
 
 
-def fight(stdscr,key):
+def fight(stdscr,key,enemy_name: str,enemy_weapon,hero_health):
     global line_counter
     display_text(stdscr,"It's time for you to attack now.\n",0,4)
     display_text(stdscr,"What tool do you want to use?\n",0,1)
@@ -229,29 +230,30 @@ def fight(stdscr,key):
         clr(stdscr)
         stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
         line_counter += 3
-        fight_show(stdscr,"spider",100,Fangs,100,Mystery,1)
+        fight_show(stdscr,enemy_name,100,enemy_weapon,hero_health,Mystery,1)
         clr(stdscr)
     elif key == Lighter.name:
         clr(stdscr)
         stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
         line_counter += 3
-        fight_show(stdscr,"spider",100,Fangs,100,Lighter,1)
+        fight_show(stdscr,enemy_name,100,enemy_weapon,hero_health,Lighter,1)
         clr(stdscr)
     elif key == Sword.name:
-        attack_area(stdscr,key,Sword)
+        attack_area(stdscr,key,Sword,hero_health,enemy_name,enemy_weapon)
         clr(stdscr)
     elif key == Knife.name:
-        attack_area(stdscr,key,Knife)
+        attack_area(stdscr,key,Knife,hero_health,enemy_name,enemy_weapon)
         clr(stdscr)
     else:
         display_text(stdscr,"Invalide choice.try again.",0,3)
         clr(stdscr)
-        fight(stdscr,key)
+        fight(stdscr,key,enemy_name,enemy_weapon,hero_health)
         
            
-def door2_entery(stdscr,key):
+def door2_entery(stdscr,key,enemy_name: str,enemy_weapon):
 
     global line_counter
+    display_text(stdscr,f"You used the key to open the other door. As you enter you find a giant {enemy_name}\n",0,4)
     display_text(stdscr,"It's attacking you act quick!\n",0,4)
     display_text(stdscr,"what do you want to do?\n",0,1)
     display_text(stdscr,"Please press:\n",0,0)
@@ -262,17 +264,26 @@ def door2_entery(stdscr,key):
     if key == 'd':
         display_text(stdscr,"You successfully dodged.\n",0,3)
         clr(stdscr)
-        fight(stdscr,key)
+        fight(stdscr,key,enemy_name,enemy_weapon,100)
 
     elif key =='b':
         display_text(stdscr,"Its attack was too strong. you didn't have enough time to get into the right stance\n",0,2)
+        line_counter += 3
+        stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
+        line_counter += 3
+        hero=Character(name="charlotte",health=100,tool=Fist)
+        enemy=Character(name= enemy_name,health=100,tool=enemy_weapon)
+        enemy.attack(stdscr,hero,1)
+        line_counter += 1
+        stdscr.addstr(line_counter,4,"******Fight\E******",curses.color_pair(5) | curses.A_BOLD)
+
         clr(stdscr)
-        fight(stdscr,key)
+        fight(stdscr,key,enemy_name,enemy_weapon,hero.health)
         
     else:
         display_text(stdscr,"Invalide choice. try again\n",0,2)
         clr(stdscr)
-        door2_entery(stdscr,key)
+        door2_entery(stdscr,key,enemy_name,enemy_weapon)
 
 
 #def door2_attack(stdscr,key,points):
@@ -297,8 +308,8 @@ def main (stdscr):
     stdscr.clear()
     global line_counter
     line_counter=0
-    display_text(stdscr,"You used the key to open the other door. As you enter you find a giant spider.\n",0,4)
-    door2_entery(stdscr,key)
+   
+    door2_entery(stdscr,key,"Monster",Fangs)
     stdscr.getch()
     time.sleep(1)
     stdscr.clear()
