@@ -31,32 +31,57 @@ def display_text(stdscr, text,start_col,color_pair_id):
     line_counter += 1
 
 line_counter=0
+
+def health_bar (stdscr,character):
+    global line_counter
+   
+    remaining_symbol = chr(0x2588)
+    lost_symbol='_'
+    barrier_symbol='|'
+    max_bars=30
+    remaining_bars=round(character.health*max_bars/character.health_max)
+    lost_bars=max_bars-remaining_bars
+    display_text(stdscr,f"{character.name}'s health : {character.health}/{character.health_max}",3,4)
+    display_text(stdscr,f"{barrier_symbol}{remaining_symbol*remaining_bars}{lost_symbol*lost_bars}{barrier_symbol}",5,character.health_bar_color)
+
+
 class Character:
-    def __init__(self,name: str,health: int,tool ) -> None:
+    def __init__(self,name: str,health: int,tool,health_bar_color :int ) -> None:
         self.name = name
         self.health = health
-        self.health_max = health
+        self.health_max = 100
         self.tool=tool
+        self.health_bar_color = health_bar_color
 
 
     def attack(self,stdscr,target, power: int =1):
         global line_counter
+        rows ,cols = stdscr.getmaxyx()
         self.power=power
         target.health -= self.tool.damage*self.power
         target.health = max(target.health, 0)
         display_text(stdscr,f"{self.name} dealt a {self.tool.damage*self.power} damage to {target.name} with {self.tool.name}",0,4)
-        display_text(stdscr,f"{self.name} health is: {self.health}",0,4)
-        display_text(stdscr,f"{target.name} health is: {target.health}",0,4)
-        line_counter += 1
-
-
-
+        health_bar(stdscr,self)
+        health_bar(stdscr,target)
         
+        #display_text(stdscr,f"{self.name} health is: {self.health}",0,4)
+        #display_text(stdscr,f"{target.name} health is: {target.health}",0,4)
+        line_counter += 2
+        if line_counter >= rows-7:
+                stdscr.clear()
+                time.sleep(2)
+                line_counter = 0
+                stdscr.refresh()
+                stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
+                line_counter +=3
 
+
+   
 
 key='a'
 points=100
 inventory=[Mystery,Knife,Sword,Lighter]
+
 
 
 
@@ -84,23 +109,33 @@ def house_entry(stdscr,key):
         display_text(stdscr,"Invalide choice. try again\n",0,2)
         house_entry(stdscr,key)
 
+
+
 def fight_show(stdscr, enemy_name : str , enemy_health : int , enemy_weapon  ,hero_health : int , hero_weapon ,hero_power: int):
     global line_counter
     rows ,col =stdscr.getmaxyx()
-    hero =Character(name="Charlotte",health=hero_health,tool=hero_weapon)
-    enemy=Character(name=enemy_name,health=enemy_health,tool=enemy_weapon)
+    hero =Character(name="Charlotte",health=hero_health,tool=hero_weapon,health_bar_color=3)
+    enemy=Character(name=enemy_name,health=enemy_health,tool=enemy_weapon,health_bar_color=2)
     
     while(hero.health!=0 and enemy.health!=0 ):
             hero.attack(stdscr,enemy,hero_power)
+           # if line_counter >= rows:
+            #    stdscr.clear()
+             #   time.sleep(2)
+              #  line_counter = 0
+               # stdscr.refresh()
+                #stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
+                #line_counter +=3
+
             if enemy.health!=0:
                 enemy.attack(stdscr,hero,1)
-            if line_counter > rows-10:
-                stdscr.clear()
-                time.sleep(1.5)
-                line_counter = 0
-                stdscr.refresh()
-                stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
-                line_counter +=3
+           # if line_counter >= rows:
+               # stdscr.clear()
+                #time.sleep(2)
+             #   line_counter = 0
+              #  stdscr.refresh()
+              #  stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
+               # line_counter +=3
 
     if(hero.health==0):
         display_text(stdscr,"you lost game over\n",0,2)
@@ -125,8 +160,8 @@ def help (stdscr,key,enemy_name:str,enemy_weapon,hero_health: int, enemy_health:
         clr(stdscr)
         stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
         line_counter +=3
-        jeremy=Character("jeremy",100,Spray)
-        enemy=Character(enemy_name,enemy_health,enemy_weapon)
+        jeremy=Character("jeremy",100,Spray,1)
+        enemy=Character(enemy_name,enemy_health,enemy_weapon,2)
         jeremy.attack(stdscr,enemy,1)
         display_text(stdscr,"jerymys attack served as a distraction",0,3)
         clr(stdscr)
@@ -140,8 +175,8 @@ def help (stdscr,key,enemy_name:str,enemy_weapon,hero_health: int, enemy_health:
         clr(stdscr)
         stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
         line_counter += 3
-        enemy=Character(enemy_name,enemy_health,enemy_weapon)
-        hero=Character("charlotte",hero_health,Fist)
+        enemy=Character(enemy_name,enemy_health,enemy_weapon,2)
+        hero=Character("charlotte",hero_health,Fist,3)
         enemy.attack(stdscr,hero,1)
         
         fight_show(stdscr,enemy_name,enemy_health,enemy_weapon,hero_health,Fist,1)
@@ -167,8 +202,8 @@ def tool_drop(stdscr,key,enemy_name :str,enemy_health: int,enemy_weapon, hero_he
         display_text(stdscr,"you weren't quick enough. you have to finish the fight with your fists",0,2)
         stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
         line_counter += 3
-        enemy=Character(enemy_name,enemy_health,enemy_weapon)
-        hero=Character("charlotte",hero_health,Fist)
+        enemy=Character(enemy_name,enemy_health,enemy_weapon,2)
+        hero=Character("charlotte",hero_health,Fist,3)
         enemy.attack(stdscr,hero,1)
         fight_show(stdscr,enemy_name,enemy_health,enemy_weapon,hero_health,Fist,1)
         clr(stdscr)
@@ -201,8 +236,8 @@ def attack_area (stdscr,key,hero_weapon,hero_health:int ,enemy_name: str, enemy_
         clr(stdscr)
     elif key == 's':
         clr(stdscr)
-        hero=Character("Charlotte",100,hero_weapon)
-        enemy=Character(enemy_name,100,enemy_weapon)
+        hero=Character("Charlotte",100,hero_weapon,3)
+        enemy=Character(enemy_name,100,enemy_weapon,2)
         stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
         line_counter += 3
         hero.attack(stdscr,enemy,2)
@@ -271,8 +306,8 @@ def door2_entery(stdscr,key,enemy_name: str,enemy_weapon):
         line_counter += 3
         stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
         line_counter += 3
-        hero=Character(name="charlotte",health=100,tool=Fist)
-        enemy=Character(name= enemy_name,health=100,tool=enemy_weapon)
+        hero=Character(name="charlotte",health=100,tool=Fist,health_bar_color=3)
+        enemy=Character(name= enemy_name,health=100,tool=enemy_weapon,health_bar_color=2)
         enemy.attack(stdscr,hero,1)
         line_counter += 1
         stdscr.addstr(line_counter,4,"******Fight\E******",curses.color_pair(5) | curses.A_BOLD)
@@ -301,17 +336,15 @@ def main (stdscr):
     curses.init_pair(3,curses.COLOR_GREEN,curses.COLOR_BLACK)
     curses.init_pair(5,curses.COLOR_YELLOW,curses.COLOR_BLACK)
     stdscr.clear()
-    display_text(stdscr,"As you walk deep in this path. you encounter a house with an unwelcoming exterior\n",0,4)
-    house_entry(stdscr,key)
-    stdscr.refresh()
-    time.sleep(1)
-    stdscr.clear()
+    #display_text(stdscr,"As you walk deep in this path. you encounter a house with an unwelcoming exterior\n",0,4)
+    #house_entry(stdscr,key)
+    #stdscr.refresh()
+    #time.sleep(1)
+    #stdscr.clear()
     global line_counter
     line_counter=0
    
-    door2_entery(stdscr,key,"Monster",Fangs)
-    stdscr.getch()
-    time.sleep(1)
+    door2_entery(stdscr,key,"Spider",Fangs)
     stdscr.clear()
     stdscr.refresh()
 
