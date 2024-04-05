@@ -139,13 +139,13 @@ def first_step(stdscr):
       global player
       
       type(stdscr,"As you step into the temple, you'll notice it's really dark inside. Hardly anything to see around here . \n use one of your tools to help you find your way \n",3)
-      choice3 = stdscr.getstr()
+      choice3 = stdscr.getstr().decode('utf-8')
       if choice3 == "torch" :
           if choice3 in tools :
               torch(stdscr)
           else :
               type(stdscr,"you do not have a torch in your inventory \n , do you want to bye one ? \n",2)
-              choice = stdscr.getstr()
+              choice = stdscr.getstr().decode('utf-8')
               if choice == "yes" :
                   player.points -= 5     # nbedlou la valeur
                   torch(stdscr)
@@ -160,7 +160,7 @@ def first_step(stdscr):
               torch(stdscr)
           else :
               type(stdscr,"you can buy a torch that will help you , do you want to ?\n",3)
-              choice = stdscr.getstr()
+              choice = stdscr.getstr().decode('utf-8')
               if choice == "yes" :
                   player.points -= 5     # nbedlou la valeur
                   torch(stdscr)
