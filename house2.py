@@ -17,20 +17,40 @@ def clr(window):
     keyy = window.getkey()
     window.clear()
     time.sleep(1)
-    line_counter = 0
+    line_counter = 1
     window.refresh()
+
+
 
 def display_text(stdscr, text,start_col,color_pair_id):
     global line_counter
+    mrows, mcols = stdscr.getmaxyx()
     stdscr.refresh()
-    time.sleep(0.2)  # Wait for a second before displaying each letter
+    time.sleep(0.2) 
+    j=0
+    if line_counter >= mrows-5:
+        line_counter = 1
+        stdscr.clear()
+        time.sleep(1)
+        line_counter = 0
+        stdscr.refresh()
+    
     for i in range(len(text)):
-        stdscr.addch(line_counter, start_col + i, text[i],curses.color_pair(color_pair_id))
+        col= start_col +j 
+        stdscr.addch(line_counter, col , text[i],curses.color_pair(color_pair_id))
         stdscr.refresh()
         time.sleep(0.05)
+        j += 1 
+        if col>= mcols - 10 and text[i]== ' ':
+            j=0
+            line_counter += 1 
+        
+
     line_counter += 1
 
-line_counter=0
+
+
+line_counter=1
 
 def health_bar (stdscr,character):
     global line_counter
@@ -45,6 +65,7 @@ def health_bar (stdscr,character):
     display_text(stdscr,f"{barrier_symbol}{remaining_symbol*remaining_bars}{lost_symbol*lost_bars}{barrier_symbol}",5,character.health_bar_color)
 
 
+
 class Character:
     def __init__(self,name: str,health: int,tool,health_bar_color :int ) -> None:
         self.name = name
@@ -56,36 +77,23 @@ class Character:
 
     def attack(self,stdscr,target, power: int =1):
         global line_counter
-        rows ,cols = stdscr.getmaxyx()
         self.power=power
         target.health -= self.tool.damage*self.power
         target.health = max(target.health, 0)
         display_text(stdscr,f"{self.name} dealt a {self.tool.damage*self.power} damage to {target.name} with {self.tool.name}",0,4)
-        health_bar(stdscr,self)
         health_bar(stdscr,target)
+        health_bar(stdscr,self)
         
-        #display_text(stdscr,f"{self.name} health is: {self.health}",0,4)
-        #display_text(stdscr,f"{target.name} health is: {target.health}",0,4)
+        
         line_counter += 2
-        if line_counter >= rows-7:
-                stdscr.clear()
-                time.sleep(2)
-                line_counter = 0
-                stdscr.refresh()
-                stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
-                line_counter +=3
 
 
    
-
 key='a'
 points=100
 inventory=[Mystery,Knife,Sword,Lighter]
 
 
-
-
-    
 
 def find (inventory,key):
     for i in range(len(inventory)):
@@ -94,66 +102,34 @@ def find (inventory,key):
         return -1
 
 
-def house_entry(stdscr,key):
-    display_text(stdscr,"How you want to enter the house?\n",0,1)
-    display_text(stdscr,"Please press:\n",0,4)
-    display_text(stdscr,"w:for window\n",2,4)
-    display_text(stdscr,"d: for door\n",2,4)
-    key = stdscr.getkey()
-    if key == 'w':
-        display_text(stdscr,"you managed to force the window open\n",0,3)
-    elif key == 'd':
-        display_text(stdscr,"The door is locked. you can't force it open. find another way in\n",0,2)
-        house_entry(stdscr,key)
-    else:
-        display_text(stdscr,"Invalide choice. try again\n",0,2)
-        house_entry(stdscr,key)
-
-
 
 def fight_show(stdscr, enemy_name : str , enemy_health : int , enemy_weapon  ,hero_health : int , hero_weapon ,hero_power: int):
     global line_counter
-    rows ,col =stdscr.getmaxyx()
     hero =Character(name="Charlotte",health=hero_health,tool=hero_weapon,health_bar_color=3)
     enemy=Character(name=enemy_name,health=enemy_health,tool=enemy_weapon,health_bar_color=2)
     
     while(hero.health!=0 and enemy.health!=0 ):
             hero.attack(stdscr,enemy,hero_power)
-           # if line_counter >= rows:
-            #    stdscr.clear()
-             #   time.sleep(2)
-              #  line_counter = 0
-               # stdscr.refresh()
-                #stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
-                #line_counter +=3
+
 
             if enemy.health!=0:
                 enemy.attack(stdscr,hero,1)
-           # if line_counter >= rows:
-               # stdscr.clear()
-                #time.sleep(2)
-             #   line_counter = 0
-              #  stdscr.refresh()
-              #  stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
-               # line_counter +=3
 
     if(hero.health==0):
-        display_text(stdscr,"you lost game over\n",0,2)
+        display_text(stdscr,"You lost game over\n",0,2)
         clr(stdscr)
     else:
         display_text(stdscr,f"The {enemy_name} has been defeated",0,3)
         clr(stdscr)
     
     
-    
-    
 
 def help (stdscr,key,enemy_name:str,enemy_weapon,hero_health: int, enemy_health: int,hero_weapon,power):
     global line_counter
-    display_text(stdscr,"Who do you want to ask\n",0,1)
-    display_text(stdscr,"Please press\n",0,4)
-    display_text(stdscr,"j: to ask jeremy\n",3,4)
-    display_text(stdscr,"m: to ask the master\n",3,4)
+    display_text(stdscr,"Whose assistance will you seek in this dire moment?",1,1)
+    display_text(stdscr,"Please press:",3,4)
+    display_text(stdscr,"j: for jeremy\n",5,4)
+    display_text(stdscr,"m: for the master\n",5,4)
     key=stdscr.getkey()
     line_counter +=1
     if key == 'j':
@@ -163,15 +139,16 @@ def help (stdscr,key,enemy_name:str,enemy_weapon,hero_health: int, enemy_health:
         jeremy=Character("jeremy",100,Spray,1)
         enemy=Character(enemy_name,enemy_health,enemy_weapon,2)
         jeremy.attack(stdscr,enemy,1)
-        display_text(stdscr,"jerymys attack served as a distraction",0,3)
+        display_text(stdscr,"Jeremy's attack provides a crucial distraction, momentarily drawing the spider's attention away from you.",1,3)
         clr(stdscr)
-        display_text(stdscr,f"It gave you enough time to pick up {jeremy.tool.name} and start attacking again",0,4)
+        display_text(stdscr,f"Jeremy's distraction grants you the precious seconds needed to pick up your weapon and resume your assault.",1,4)
         stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
         line_counter += 3
         fight_show(stdscr,enemy_name,enemy_health,enemy_weapon,hero_health,hero_weapon,power)
         
     elif key== 'm':
-        display_text(stdscr,"The master can't help. He took an oath not to interfere with the mission",0,2)
+        display_text(stdscr,"The master remains unable to intervene, bound by an oath sworn not to interfere with the mission.",0,2)
+        display_text(stdscr,f"You're left to confront the {enemy_name} on your own, relying solely on your fists",1,2)
         clr(stdscr)
         stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
         line_counter += 3
@@ -190,16 +167,18 @@ def help (stdscr,key,enemy_name:str,enemy_weapon,hero_health: int, enemy_health:
 
 def tool_drop(stdscr,key,enemy_name :str,enemy_health: int,enemy_weapon, hero_health: int,hero_weapon,power):
     global line_counter
-    display_text(stdscr,"The attack of the spider caused you to drop your weapon\n",0,4)
-    display_text(stdscr,"How do you want to procede?\n",0,1)
-    display_text(stdscr,"Please press\n",0,4)
-    display_text(stdscr,"h: to ask for help\n",3,4)
-    display_text(stdscr,"p: to try and pick up the weapon\n",3,4)
+    display_text(stdscr,f"The {enemy_name}'s ferocious attack forces you to relinquish your weapon, the force of the blow knocking it from your grasp.\n",1,4)
+    time.sleep(1)
+    display_text(stdscr,"What is your next step?",1,1)
+    display_text(stdscr,"Please press\n",3,4)
+    display_text(stdscr,"h: to ask for help",5,4)
+    display_text(stdscr,"p: to try and pick up the weapon",5,4)
     key=stdscr.getkey()
     line_counter += 1
     if key == 'p':
         clr(stdscr)
-        display_text(stdscr,"you weren't quick enough. you have to finish the fight with your fists",0,2)
+        display_text(stdscr,"Your reflexes faltered, leaving you unable to retrieve your weapon in time. Now, you must rely on your bare fists to finish the fight.",1,2)
+        line_counter += 2
         stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
         line_counter += 3
         enemy=Character(enemy_name,enemy_health,enemy_weapon,2)
@@ -222,10 +201,11 @@ def tool_drop(stdscr,key,enemy_name :str,enemy_health: int,enemy_weapon, hero_he
 
 def attack_area (stdscr,key,hero_weapon,hero_health:int ,enemy_name: str, enemy_weapon):
     global line_counter
-    display_text(stdscr,"Where do you want to hit?\n",0,1)
-    display_text(stdscr,"Please press\n",0,4)
-    display_text(stdscr,"o: for over the head\n",3,4)
-    display_text(stdscr,"s: for sliding under\n",3,4)
+    line_counter += 2
+    display_text(stdscr,"Choose your target wisely. Where will you aim your strike?\n",1,1)
+    display_text(stdscr,"Please press\n",3,4)
+    display_text(stdscr,"o: for over the head\n",5,4)
+    display_text(stdscr,"s: for sliding under\n",5,4)
     key= stdscr.getkey()
     line_counter += 1
     if key == 'o':
@@ -254,9 +234,10 @@ def attack_area (stdscr,key,hero_weapon,hero_health:int ,enemy_name: str, enemy_
 
 def fight(stdscr,key,enemy_name: str,enemy_weapon,hero_health):
     global line_counter
-    display_text(stdscr,"It's time for you to attack now.\n",0,4)
-    display_text(stdscr,"What tool do you want to use?\n",0,1)
-    display_text(stdscr,f"Your options are:{inventory[0].name} ,{inventory[1].name} ,{inventory[2].name}\n",0,4)
+    display_text(stdscr,"Now is your chance to strike back! Seize the moment and unleash your counterattack!\n",1,4)
+    time.sleep(1)
+    display_text(stdscr,"Pick your tool:",1,1)
+    display_text(stdscr,f"Your options are:{inventory[0].name} ,{inventory[1].name} ,{inventory[2].name}\n",2,4)
     curses.echo()
     key= stdscr.getstr().decode('utf-8')
     curses.noecho()
@@ -284,25 +265,32 @@ def fight(stdscr,key,enemy_name: str,enemy_weapon,hero_health):
         clr(stdscr)
         fight(stdscr,key,enemy_name,enemy_weapon,hero_health)
         
-           
+
+
 def door2_entery(stdscr,key,enemy_name: str,enemy_weapon):
 
     global line_counter
-    display_text(stdscr,f"You used the key to open the other door. As you enter you find a giant {enemy_name}\n",0,4)
-    display_text(stdscr,"It's attacking you act quick!\n",0,4)
-    display_text(stdscr,"what do you want to do?\n",0,1)
-    display_text(stdscr,"Please press:\n",0,0)
-    display_text(stdscr,"b: for block\n",3,4)
-    display_text(stdscr,"d: for dodge\n",3,4)
+    display_text(stdscr,"As you insert the key into the lock, the mechanism clicks softly, allowing the door to swing open with a creak. Your senses are immediately assaulted by a musty odor, and as you step cautiously into the room, you're met with a chilling sight.",1,4)
+    display_text(stdscr,f"Before you stands a colossal {enemy_name}, its body poised menacingly. This isn't just any {enemy_name}; it's the matriarch, the mother of all the smaller {enemy_name}s you've encountered thus far.",1,4)
+    line_counter += 1
+    time.sleep(1)
+    display_text(stdscr,f"With a primal hiss, it lunges at you, venom dripping from its {enemy_weapon.name}. There's no time to hesitate - you must act swiftly to fend off this formidable adversary!",1,4)
+    line_counter += 1
+    time.sleep(1)
+    display_text(stdscr,"what do you want to do?\n",1,1)
+    display_text(stdscr,"Please press:\n",2,0)
+    display_text(stdscr,"b: for block\n",5,4)
+    display_text(stdscr,"d: for dodge\n",5,4)
     key=stdscr.getkey()
     line_counter += 1
     if key == 'd':
-        display_text(stdscr,"You successfully dodged.\n",0,3)
+        display_text(stdscr,f"With lightning reflexes, you manage to sidestep the {enemy_name}'s attack just in time, narrowly avoiding its deadly strike",1,3)
         clr(stdscr)
         fight(stdscr,key,enemy_name,enemy_weapon,100)
-
+    
     elif key =='b':
-        display_text(stdscr,"Its attack was too strong. you didn't have enough time to get into the right stance\n",0,2)
+        display_text(stdscr,f"The force of its attack overwhelms you, leaving you scrambling to find your footing. Before you can even assume the proper defensive stance, the {enemy_name}'s strike lands true, catching you off guard.",1,2)
+        clr(stdscr)
         line_counter += 3
         stdscr.addstr(line_counter,4,"******Fight******",curses.color_pair(5) | curses.A_BOLD)
         line_counter += 3
@@ -321,13 +309,6 @@ def door2_entery(stdscr,key,enemy_name: str,enemy_weapon):
         door2_entery(stdscr,key,enemy_name,enemy_weapon)
 
 
-#def door2_attack(stdscr,key,points):
- #   display_text(stdscr,"Its time for you to attack now.\n",line_counter,0,0)
-  #  display_text(stdscr,"What tools do you want to use during the fight.\n",line_counter,0,1)
-   # key=stdscr.getstr().decode(encoding="utf-8")
-    #if key != "gun" and key != "knife":
-
-
 
 def main (stdscr):
     curses.init_pair(4,curses.COLOR_WHITE,curses.COLOR_BLACK)
@@ -336,14 +317,7 @@ def main (stdscr):
     curses.init_pair(3,curses.COLOR_GREEN,curses.COLOR_BLACK)
     curses.init_pair(5,curses.COLOR_YELLOW,curses.COLOR_BLACK)
     stdscr.clear()
-    #display_text(stdscr,"As you walk deep in this path. you encounter a house with an unwelcoming exterior\n",0,4)
-    #house_entry(stdscr,key)
-    #stdscr.refresh()
-    #time.sleep(1)
-    #stdscr.clear()
     global line_counter
-    line_counter=0
-   
     door2_entery(stdscr,key,"Spider",Fangs)
     stdscr.clear()
     stdscr.refresh()
